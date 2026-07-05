@@ -1,0 +1,21 @@
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --cor-preto: #0a0c0f;
+  --cor-cinza-escuro: #1a1e24;
+  --cor-cinza: #262b33;
+  --cor-cinza-claro: #3a4049;
+  --cor-azul-celeste: #38bdf8;
+  --cor-azul-celeste-claro: #7dd3fc;
+  --cor-texto: #e5e9f0;
+  --cor-texto-suave: #93a0b3;
+  --cor-perigo: #f87171;
+  --cor-perigo-hover: #fca5a5;
+}
+
+body {
+  background: var(--cor-preto);
+}
