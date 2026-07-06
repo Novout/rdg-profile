@@ -117,6 +117,24 @@ function removerTalento(id: string) {
   ficha.talentos = ficha.talentos.filter((talento) => talento.id !== id);
 }
 
+const modalNotasAberto = ref(false);
+
+function abrirNotas() {
+  modalNotasAberto.value = true;
+}
+
+function fecharNotas() {
+  modalNotasAberto.value = false;
+}
+
+function novaNota() {
+  ficha.notas.push({ id: crypto.randomUUID(), titulo: '', conteudo: '' });
+}
+
+function removerNota(id: string) {
+  ficha.notas = ficha.notas.filter((nota) => nota.id !== id);
+}
+
 function limparFicha() {
   if (!confirm('Tem certeza que deseja apagar todos os dados e começar do zero?')) return;
   const nova = criarFicha();
@@ -171,16 +189,16 @@ function excluirPersonagem() {
           <input v-model="ficha.descricao.jogador" type="text" placeholder="Seu nome" />
         </label>
         <label class="campo">
-          <span>Classe</span>
-          <input v-model="ficha.descricao.classe" type="text" placeholder="Ex: Guerreiro" />
-        </label>
-        <label class="campo">
-          <span>Subclasse</span>
+          <span>Origem</span>
           <input v-model="ficha.descricao.subclasse" type="text" placeholder="Ex: Cavaleiro Sagrado" />
         </label>
         <label class="campo">
           <span>Raça</span>
           <input v-model="ficha.descricao.raca" type="text" placeholder="Ex: Humano" />
+        </label>
+        <label class="campo">
+          <span>Classe</span>
+          <input v-model="ficha.descricao.classe" type="text" placeholder="Ex: Guerreiro" />
         </label>
         <label class="campo">
           <span>Nível</span>
@@ -195,10 +213,12 @@ function excluirPersonagem() {
           <input v-model="ficha.descricao.alinhamento" type="text" placeholder="Ex: Neutro e Bom" />
         </label>
       </div>
-      <label class="campo campo--largo">
+      <div class="campo campo--largo campo--notas">
         <span>História / Notas</span>
-        <textarea v-model="ficha.descricao.historia" rows="4" placeholder="Personalidade, ideais, vínculos, defeitos, história..."></textarea>
-      </label>
+        <button type="button" class="botao botao--secundario" @click="abrirNotas">
+          📓 Ver anotações ({{ ficha.notas.length }})
+        </button>
+      </div>
       <label class="campo campo--largo">
         <span>Ponto de Quebra (Ruptura)</span>
         <textarea v-model="ficha.descricao.quebra" rows="4" placeholder="O momento que o seu personagem virou a chave..."></textarea>
@@ -329,6 +349,27 @@ function excluirPersonagem() {
         <textarea v-model="talento.descricao" rows="2" placeholder="Descrição do talento"></textarea>
       </div>
     </section>
+  </div>
+
+  <!-- Modal: História / Notas -->
+  <div v-if="modalNotasAberto" class="modal-fundo" @click.self="fecharNotas">
+    <div class="modal-conteudo">
+      <div class="cartao__cabecalho">
+        <h2>História / Notas</h2>
+        <button type="button" class="botao" @click="novaNota">+ Adicionar anotação</button>
+      </div>
+      <p v-if="!ficha.notas.length" class="vazio">Nenhuma anotação adicionada ainda.</p>
+      <div v-for="nota in ficha.notas" :key="nota.id" class="cartao-lista-item">
+        <div class="cartao-lista-item__cabecalho">
+          <input v-model="nota.titulo" type="text" placeholder="Título da anotação" />
+          <button type="button" class="botao botao--icone" title="Remover anotação" @click="removerNota(nota.id)">✕</button>
+        </div>
+        <textarea v-model="nota.conteudo" rows="5" placeholder="Personalidade, ideais, vínculos, defeitos, história..."></textarea>
+      </div>
+      <div class="modal-conteudo__rodape">
+        <button type="button" class="botao botao--secundario" @click="fecharNotas">Fechar</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -542,6 +583,14 @@ function excluirPersonagem() {
 
 .campo--largo {
   margin-bottom: 0.75rem;
+}
+
+.campo--notas {
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  gap: 0.5rem;
+  padding: 1rem 0;
 }
 
 .campo--somente-leitura {
@@ -781,5 +830,38 @@ function excluirPersonagem() {
 
 .botao--icone {
   padding: 0.3rem 0.6rem;
+}
+
+.modal-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 1.5rem;
+}
+
+.modal-conteudo {
+  width: min(640px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--cor-cinza-escuro);
+  border: 1px solid var(--cor-azul-celeste);
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.modal-conteudo h2 {
+  margin: 0;
+  color: var(--cor-azul-celeste-claro);
+}
+
+.modal-conteudo__rodape {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
 }
 </style>

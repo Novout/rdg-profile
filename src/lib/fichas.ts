@@ -27,6 +27,12 @@ export interface Talento {
   descricao: string;
 }
 
+export interface Nota {
+  id: string;
+  titulo: string;
+  conteudo: string;
+}
+
 export interface Ficha {
   id: string;
   criadoEm: number;
@@ -57,6 +63,7 @@ export interface Ficha {
   equipamento: ItemEquipamento[];
   habilidades: Habilidade[];
   talentos: Talento[];
+  notas: Nota[];
 }
 
 export const ATRIBUTOS_LABEL: Record<ChaveAtributo, string> = {
@@ -148,6 +155,7 @@ export function criarFicha(): Ficha {
     equipamento: [],
     habilidades: [],
     talentos: [],
+    notas: [],
   };
 }
 
@@ -155,6 +163,15 @@ const STORAGE_KEY = 'rdg-profile:fichas';
 
 function normalizarFicha(bruta: any): Ficha {
   const padrao = criarFicha();
+
+  const notasSalvas = Array.isArray(bruta?.notas) ? bruta.notas : [];
+  const historiaAntiga: string = typeof bruta?.descricao?.historia === 'string' ? bruta.descricao.historia.trim() : '';
+  const notas = notasSalvas.length
+    ? notasSalvas
+    : historiaAntiga
+      ? [{ id: crypto.randomUUID(), titulo: 'História', conteudo: historiaAntiga }]
+      : padrao.notas;
+
   return {
     id: typeof bruta?.id === 'string' ? bruta.id : padrao.id,
     criadoEm: typeof bruta?.criadoEm === 'number' ? bruta.criadoEm : padrao.criadoEm,
@@ -167,6 +184,7 @@ function normalizarFicha(bruta: any): Ficha {
     equipamento: Array.isArray(bruta?.equipamento) ? bruta.equipamento : [],
     habilidades: Array.isArray(bruta?.habilidades) ? bruta.habilidades : [],
     talentos: Array.isArray(bruta?.talentos) ? bruta.talentos : [],
+    notas,
   };
 }
 
