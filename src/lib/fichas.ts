@@ -202,3 +202,30 @@ export function removerFicha(id: string): void {
   const fichas = listarFichas().filter((ficha) => ficha.id !== id);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(fichas));
 }
+
+export function exportarFicha(ficha: Ficha): void {
+  const json = JSON.stringify(ficha, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  const nome = (ficha.descricao.nome || 'personagem').trim().replace(/[^\p{L}\p{N}]+/gu, '-').toLowerCase();
+  link.href = url;
+  link.download = `ficha-${nome || 'personagem'}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+export function importarFicha(json: string): Ficha {
+  const bruta = JSON.parse(json);
+  if (typeof bruta !== 'object' || bruta === null || Array.isArray(bruta)) {
+    throw new Error('O arquivo não contém uma ficha válida.');
+  }
+  const ficha = normalizarFicha(bruta);
+  // Evita sobrescrever uma ficha existente com o mesmo id
+  if (obterFicha(ficha.id)) {
+    ficha.id = crypto.randomUUID();
+  }
+  ficha.atualizadoEm = Date.now();
+  salvarFicha(ficha);
+  return ficha;
+}

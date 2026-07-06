@@ -7,6 +7,7 @@ import {
   obterFicha,
   salvarFicha,
   removerFicha,
+  exportarFicha,
   type ChaveAtributo,
   type Ficha,
   type Pericia,
@@ -138,6 +139,7 @@ function excluirPersonagem() {
       <button type="button" class="botao botao--secundario" @click="emit('voltar')">&larr; Voltar à lista</button>
       <h1>{{ ficha.descricao.nome || 'Ficha de Personagem' }}</h1>
       <div class="ficha__acoes">
+        <button type="button" class="botao botao--secundario" @click="exportarFicha(ficha)">Exportar</button>
         <button type="button" class="botao botao--perigo" @click="limparFicha">Limpar dados</button>
         <button type="button" class="botao botao--perigo" @click="excluirPersonagem">Excluir personagem</button>
       </div>

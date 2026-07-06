@@ -1,10 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { listarFichas, criarFicha, salvarFicha, removerFicha, type Ficha } from '../lib/fichas';
+import {
+  listarFichas,
+  criarFicha,
+  salvarFicha,
+  removerFicha,
+  exportarFicha,
+  importarFicha,
+  type Ficha,
+} from '../lib/fichas';
 
 const emit = defineEmits<{ selecionar: [id: string] }>();
 
 const fichas = ref<Ficha[]>(listarFichas());
+const inputImportacao = ref<HTMLInputElement | null>(null);
 
 function atualizarLista() {
   fichas.value = listarFichas();
@@ -27,6 +36,24 @@ function excluirPersonagem(ficha: Ficha) {
   atualizarLista();
 }
 
+function abrirImportacao() {
+  inputImportacao.value?.click();
+}
+
+async function aoSelecionarArquivo(evento: Event) {
+  const input = evento.target as HTMLInputElement;
+  const arquivo = input.files?.[0];
+  input.value = '';
+  if (!arquivo) return;
+  try {
+    const ficha = importarFicha(await arquivo.text());
+    atualizarLista();
+    alert(`Ficha "${ficha.descricao.nome || 'Sem nome'}" importada com sucesso!`);
+  } catch {
+    alert('Não foi possível importar: o arquivo não é uma ficha válida.');
+  }
+}
+
 function formatarData(timestamp: number): string {
   return new Date(timestamp).toLocaleString('pt-BR', {
     day: '2-digit',
@@ -42,7 +69,11 @@ function formatarData(timestamp: number): string {
   <div class="lista">
     <header class="lista__topo">
       <h1>Meus Personagens</h1>
-      <button type="button" class="botao" @click="criarPersonagem">+ Novo personagem</button>
+      <div class="lista__acoes">
+        <button type="button" class="botao botao--secundario" @click="abrirImportacao">Importar ficha</button>
+        <button type="button" class="botao" @click="criarPersonagem">+ Novo personagem</button>
+      </div>
+      <input ref="inputImportacao" type="file" accept=".json,application/json" class="input-oculto" @change="aoSelecionarArquivo" />
     </header>
 
     <p v-if="!fichas.length" class="vazio">Nenhum personagem salvo ainda. Crie o primeiro!</p>
@@ -60,6 +91,7 @@ function formatarData(timestamp: number): string {
         </div>
         <div class="cartao-personagem__acoes">
           <button type="button" class="botao" @click="editarPersonagem(ficha.id)">Editar</button>
+          <button type="button" class="botao botao--secundario" @click="exportarFicha(ficha)">Exportar</button>
           <button type="button" class="botao botao--perigo" @click="excluirPersonagem(ficha)">Excluir</button>
         </div>
       </li>
@@ -154,6 +186,26 @@ function formatarData(timestamp: number): string {
 .botao:hover {
   background: var(--cor-azul-celeste-claro);
   border-color: var(--cor-azul-celeste-claro);
+}
+
+.lista__acoes {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input-oculto {
+  display: none;
+}
+
+.botao--secundario {
+  background: transparent;
+  color: var(--cor-azul-celeste);
+  border: 1px solid var(--cor-azul-celeste);
+}
+
+.botao--secundario:hover {
+  background: var(--cor-cinza);
+  border-color: var(--cor-azul-celeste);
 }
 
 .botao--perigo {
